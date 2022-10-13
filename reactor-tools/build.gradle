@@ -192,6 +192,9 @@ project.tasks.buildPluginTest.dependsOn(generateMockGradle)
 project.tasks.check.dependsOn(buildPluginTest)
 
 tasks.withType(Test).all {
+    if(System.getProperty("HARNESS_JAVA_AGENT")) {
+        jvmArgs += [System.getProperty("HARNESS_JAVA_AGENT")]
+    }
     useJUnitPlatform()
 }
 

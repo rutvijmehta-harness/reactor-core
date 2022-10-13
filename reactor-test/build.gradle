@@ -116,7 +116,10 @@ task japicmp(type: JapicmpTask) {
 }
 
 tasks.withType(Test).all {
-  useJUnitPlatform()
+//	if(System.getProperty("HARNESS_JAVA_AGENT")) {
+//		jvmArgs += [System.getProperty("HARNESS_JAVA_AGENT")]
+//	}
+  	useJUnitPlatform()
 }
 
 // javadoc is configured in gradle/javadoc.gradle
