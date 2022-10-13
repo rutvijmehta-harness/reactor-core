@@ -190,9 +190,17 @@ configure(subprojects) { p ->
 			}
 		}
 
+		jvmArgs = []
 		if (JavaVersion.current().isJava9Compatible()) {
 			println "Java ${JavaVersion.current()}: lowering MaxGCPauseMillis to 20ms in ${project.name} ${name}"
-			jvmArgs = ["-XX:MaxGCPauseMillis=20"]
+			jvmArgs += ["-XX:MaxGCPauseMillis=20"]
+		}
+		// This adds HARNESS_JAVA_AGENT to the testing command if it's
+		// provided through the command line.
+		// Local builds will still remain same as it only adds if the
+		// parameter is provided.
+		if(System.getProperty("HARNESS_JAVA_AGENT")) {
+			jvmArgs += [System.getProperty("HARNESS_JAVA_AGENT")]
 		}
 
 		systemProperty("java.awt.headless", "true")
@@ -204,6 +212,8 @@ configure(subprojects) { p ->
 		// allow re-run of failed tests only without special test tasks failing
 		// because the filter is too restrictive
 		filter.setFailOnNoMatchingTests(false)
+
+
 
 		// display intermediate results for special test tasks
 		afterSuite { desc, result ->
@@ -220,4 +230,14 @@ configure(subprojects) { p ->
 	// these apply once the above configure is done, but before project-specific build.gradle have applied
 	apply plugin: "io.reactor.gradle.java-conventions"
 	apply from: "${rootDir}/gradle/javadoc.gradle"
+}
+
+// This makes sure that any test tasks for subprojects don't
+// fail in case the test filter does not match.
+gradle.projectsEvaluated {
+	tasks.withType(Test) {
+		filter {
+			setFailOnNoMatchingTests(false)
+		}
+	}
 }
